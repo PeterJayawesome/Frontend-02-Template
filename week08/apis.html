@@ -1,0 +1,356 @@
+<script>
+    let names = Object.getOwnPropertyNames(window);
+    let nameSet = new Set(names);
+
+    function filterOut(props) {
+        let set = new Set();
+        props.forEach(prop => {
+            if (!nameSet.has(prop))
+                console.log(prop, nameSet.has(prop));
+            set.add(prop)
+        });
+        names = names.filter(e => !set.has(e));
+        return names;
+    }
+
+    // ECMA 262, 888 left
+    {
+        let js = new Set();
+        let objects = [
+            "Object",
+            "Function",
+            "Array",
+            "Number",
+            "parseFloat",
+            "parseInt",
+            "Infinity",
+            "NaN",
+            "undefined",
+            "Boolean",
+            "String",
+            "Symbol",
+            "Date",
+            "Promise",
+            "RegExp",
+            "Error",
+            "EvalError",
+            "RangeError",
+            "ReferenceError",
+            "SyntaxError",
+            "TypeError",
+            "URIError",
+            "globalThis",
+            "JSON",
+            "Math",
+            "console",
+            "ArrayBuffer",
+            "Uint8Array",
+            "Int8Array",
+            "Uint16Array",
+            "Int16Array",
+            "Uint32Array",
+            "Int32Array",
+            "Float32Array",
+            "Float64Array",
+            "Uint8ClampedArray",
+            "BigUint64Array",
+            "BigInt64Array",
+            "DataView",
+            "Map",
+            "BigInt",
+            "Set",
+            "WeakMap",
+            "WeakSet",
+            "Proxy",
+            "Reflect",
+            "decodeURI",
+            "decodeURIComponent",
+            "encodeURI",
+            "encodeURIComponent",
+            "escape",
+            "unescape",
+            "eval",
+            "isFinite",
+            "isNaN",
+            "SharedArrayBuffer",
+            "Atomics",
+            "DataView",
+        ];
+
+        filterOut(objects);
+
+    }
+    // subclass of Node, 727 left
+    names = names.filter(e => {
+        try {
+            return !(window[e].prototype instanceof Node);
+        } catch (error) {
+            return true;
+        }
+    }).filter(e => e !== "Node");
+
+    // events, 623 left
+    names = names.filter(e => !e.match(/^on/));
+
+    // webkit private, 610 left
+    names = names.filter(e => !e.match(/^webkit/));
+
+    // https://html.spec.whatwg.org/#all-interfaces, 549 left
+    {
+        let htmlInterfaces = ['ApplicationCache',
+            'BarProp',
+            'BeforeUnloadEvent',
+            'BroadcastChannel',
+            'CanvasGradient',
+            'CanvasPattern',
+            'CanvasRenderingContext2D',
+            'CloseEvent',
+            'CustomElementRegistry',
+            'DOMParser',
+            'DOMStringList',
+            'DOMStringMap'
+            , 'DataTransfer'
+            , 'DataTransferItem'
+            , 'DataTransferItemList'
+            , 'Document'
+            , 'DragEvent'
+            , 'ElementInternals'
+            , 'ErrorEvent'
+            , 'EventSource'
+            , 'External'
+            , 'FormDataEvent'
+            , 'HTMLAllCollection'
+            , 'HTMLAnchorElement'
+            , 'HTMLAreaElement'
+            , 'HTMLAudioElement'
+            , "HTMLBRElement"
+            , 'HTMLBaseElement'
+            , 'HTMLBodyElement'
+            , 'HTMLButtonElement'
+            , 'HTMLCanvasElement'
+            , 'HTMLDListElement'
+            , 'HTMLDataElement'
+            , 'HTMLDataListElement'
+            , 'HTMLDetailsElement'
+            , 'HTMLDialogElement'
+            , 'HTMLDirectoryElement'
+            , 'HTMLDivElement'
+            , 'HTMLElement'
+            , 'HTMLEmbedElement'
+            , 'HTMLFieldSetElement'
+            , 'HTMLFontElement'
+            , 'HTMLFormControlsCollection'
+            , 'HTMLFormElement'
+            , 'HTMLFrameElement'
+            , 'HTMLFrameSetElement'
+            , 'HTMLHRElement'
+            , 'HTMLHeadElement'
+            , 'HTMLHeadingElement'
+            , 'HTMLHtmlElement'
+            , 'HTMLIFrameElement'
+            , 'HTMLImageElement'
+            , 'HTMLInputElement'
+            , 'HTMLLIElement'
+            , 'HTMLLabelElement'
+            , 'HTMLLegendElement'
+            , 'HTMLLinkElement'
+            , 'HTMLMapElement'
+            , 'HTMLMarqueeElement'
+            , 'HTMLMediaElement'
+            , 'HTMLMenuElement'
+            , 'HTMLMetaElement'
+            , 'HTMLMeterElement'
+            , 'HTMLModElement'
+            , 'HTMLOListElement'
+            , 'HTMLObjectElement'
+            , 'HTMLOptGroupElement'
+            , 'HTMLOptionElement'
+            , 'HTMLOptionsCollection'
+            , 'HTMLOutputElement'
+            , 'HTMLParagraphElement'
+            , 'HTMLParamElement'
+            , 'HTMLPictureElement'
+            , 'HTMLPreElement'
+            , 'HTMLProgressElement'
+            , 'HTMLQuoteElement'
+            , 'HTMLScriptElement'
+            , 'HTMLSelectElement'
+            , 'HTMLSlotElement'
+            , 'HTMLSourceElement'
+            , 'HTMLSpanElement'
+            , 'HTMLStyleElement'
+            , 'HTMLTableCaptionElement'
+            , 'HTMLTableCellElement'
+            , 'HTMLTableColElement'
+            , 'HTMLTableElement'
+            , 'HTMLTableRowElement'
+            , 'HTMLTableSectionElement'
+            , 'HTMLTemplateElement'
+            , 'HTMLTextAreaElement'
+            , 'HTMLTimeElement'
+            , 'HTMLTitleElement'
+            , 'HTMLTrackElement'
+            , 'HTMLUListElement'
+            , 'HTMLUnknownElement'
+            , 'HTMLVideoElement'
+            , 'HashChangeEvent'
+            , 'History'
+            , 'ImageBitmap'
+            , 'ImageBitmapRenderingContext'
+            , 'ImageData'
+            , 'Location'
+            , 'MediaError'
+            , 'MessageChannel'
+            , 'MessageEvent'
+            , 'MessagePort'
+            , 'MimeType'
+            , 'MimeTypeArray'
+            , 'Navigator'
+            , 'OffscreenCanvas'
+            , 'OffscreenCanvasRenderingContext2D'
+            , 'PageTransitionEvent'
+            , 'Path2D'
+            , 'Plugin'
+            , 'PluginArray'
+            , 'PopStateEvent'
+            , 'PromiseRejectionEvent'
+            , 'RadioNodeList'
+            , 'SharedWorker'
+            , 'Storage'
+            , 'StorageEvent'
+            , 'SubmitEvent'
+            , 'TextMetrics'
+            , 'TextTrack'
+            , 'TextTrackCue'
+            , 'TextTrackCueList'
+            , 'TextTrackList'
+            , 'TimeRanges'
+            , 'TrackEvent'
+            , 'ValidityState'
+            , 'WebSocket'
+            , 'Window'
+            , 'Worker'];
+        filterOut(htmlInterfaces);
+    }
+
+    // http://www.ecma-international.org/ecma-402/5.0/index.html#Title, 548 left
+    {
+        names = names.filter(e => e !== 'Intl');
+    }
+
+    // http://www.khronos.org/registry/webgl/specs/lastest/1.0/#5.15, 531 left
+    names = names.filter(e => !e.match(/^WebGL/));
+
+    // https://www.w3.org/TR/webaudio,  501 left
+    filterOut([
+        'BaseAudioContext',
+        "AudioContext",
+        "OfflineAudioContext",
+        "AudioBuffer",
+        "AudioNode",
+        "AudioParam",
+        "AudioScheduledSourceNode",
+        'AnalyserNode',
+        "AudioBufferSourceNode",
+        'AudioDestinationNode',
+        "AudioListener",
+        "AudioProcessingEvent",
+        'BiquadFilterNode',
+        "ChannelMergerNode",
+        "ChannelSplitterNode",
+        "ConstantSourceNode",
+        "ConvolverNode",
+        "DelayNode",
+        'DynamicsCompressorNode',
+        'GainNode',
+        'IIRFilterNode',
+        'MediaElementAudioSourceNode',
+        'MediaStreamAudioSourceNode',
+        'OscillatorNode',
+        'PannerNode',
+        'PeriodicWave',
+        'ScriptProcessorNode',
+        'StereoPannerNode',
+        'WaveShaperNode',
+        'AudioWorklet',
+        'MediaStreamAudioDestinationNode',
+        'OfflineAudioCompletionEvent',
+    ]);
+
+    // https://encoding.spec.whatwg.org/#dom-textencoder
+    filterOut(['TextDecoder', 'TextEncoder', 'TextDecoderStream', 'TextEncoderStream']);
+
+    // https://w3c.github.io/media-source, 多媒体源插件标准
+    filterOut(['MediaSource', 'SourceBuffer', 'SourceBufferList', 'URL'])
+
+    // https://www.w3.org/TR/webrtc/, Real-time Communication Between Browsers网页即时通信，支持实时语音对话或者视频对话的API
+    names = names.filter(e => !e.match(/^RTC/));
+    filterOut(['MediaStreamEvent']);
+
+    // https://www.w3.org/TR/screen-orientation/
+    names = filterOut(['ScreenOrientation'])
+
+    // https://wicg.github.io/background-sync/spec/#sync-manager-interface
+    filterOut(['SyncManager']);
+
+    // https://www.w3.org/TR/image-capture/
+    filterOut([
+        'PhotoCapabilities',
+        'ImageBitmap',
+        'MediaSettingsRange',
+        'ImageCapture',
+    ]);
+
+    // https://www.w3.org/TR/mediacapture-streams/
+    filterOut([
+        'MediaStream',
+        'MediaStreamTrack',
+        'MediaStreamTrackEvent',
+        'OverconstrainedError',
+    ]);
+
+    // https://wicg.github.io/netinfo/#idl-def-NetworkInformation
+    filterOut([
+        // 'ConnectionType',
+        // 'NavigaitonNetworkInformation',
+        'NetworkInformation',
+    ]);
+
+    // https://w3c.github.io/mediacapture-record/#MediaRecorderAPI
+    filterOut([
+        "MediaRecorder",
+    ])
+
+    // https://w3c.github.io/media-capabilities/#mediacapabilities
+    filterOut([
+        "MediaCapabilities",
+    ])
+
+    // https://www.w3.org/TR/IndexedDB/#introduction
+    names = names.filter(e => !e.match(/^IDB/));
+
+    // https://w3c.github.io/geolocation-api/#introduction
+    filterOut([
+        "Navigator",
+        'Geolocation',
+        // "PositionOptions",
+        "GeolocationPosition",
+        "GeolocationCoordinates",
+        "GeolocationPositionError"
+    ]);
+
+    // https://w3c.github.io/gamepad/ 游戏控制器API
+    names = names.filter(e => !e.match(/^Gamepad/));
+
+
+    // svg
+    names = names.filter(e => !e.match(/^SVG/));
+
+
+
+    /*
+    未完待续……
+    */
+
+    console.log(names);
+</script>
