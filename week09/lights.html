@@ -1,0 +1,55 @@
+<style>
+    .light {
+        width: 100px;
+        height: 100px;
+        border-radius: 50px;
+
+        background-color: gray;
+        display: inline-block;
+    }
+    #red.on {
+        background-color: red;
+    }
+    #green.on {
+        background-color: green;
+    }
+    #yellow.on {
+        background-color: yellow;
+    }
+</style>
+<div class="container">
+    <div class='light' id='green'></div>
+    <div class='light' id='yellow'></div>
+    <div class='light' id='red'></div>
+</div>
+
+<script>
+    function sleep(d) {
+        return new Promise(res => {
+            setTimeout(res, d);
+        })
+    };
+
+    async function go() {
+        while (true) {
+            turnLight('green');
+            await sleep(1000);
+            turnLight('yellow');
+            await sleep(300);
+            turnLight('red');
+            await sleep(500);
+        }
+    }
+
+    function turnLight(color) {
+        ['green', 'yellow', 'red'].forEach(c => {
+            let light = document.getElementById(c);
+            if (c === color) {
+                light.classList.add('on');
+            } else {
+                light.classList.remove('on');
+            }
+        })
+    }
+
+</script>

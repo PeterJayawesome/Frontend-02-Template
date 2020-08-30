@@ -1,0 +1,188 @@
+<style>
+    #map {
+        width: 701px;
+    }
+
+    .cell {
+        display: inline-block;
+        line-height: 7px;
+        width: 6px;
+        height: 6px;
+        background-color: gray;
+        border-bottom: solid 1px white;
+        border-right: solid 1px white;
+        vertical-align: top;
+    }
+</style>
+
+<div id='container'>
+    <div id='map'></div>
+    <button onclick="localStorage['map'] = JSON.stringify(map)">save</button>
+</div>
+
+<script>
+    let map = localStorage['map'] ? JSON.parse(localStorage['map']) : Array(10000).fill(0);
+    let [mouseDown, clear] = [false, false];
+
+    let container = document.getElementById('map');
+    for (let y = 0; y < 100; y++) {
+        for (let x = 0; x < 100; x++) {
+            let cell = document.createElement('div');
+            cell.classList.add('cell');
+            if (map[100 * y + x] === 1) {
+                cell.style.backgroundColor = 'black';
+            }
+            cell.addEventListener('mousemove', () => {
+                if (mouseDown) {
+                    if (clear) {
+                        cell.style.backgroundColor = '';
+                        map[y * 100 + x] = 0;
+                    } else {
+                        cell.style.backgroundColor = 'black';
+                        map[y * 100 + x] = 1;
+                    }
+                }
+            });
+            container.appendChild(cell);
+        }
+    }
+    document.addEventListener('mousedown', e => {
+        mouseDown = true;
+        clear = (e.which === 3);
+    });
+    document.addEventListener('mouseup', () => mouseDown = false);
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    // 常规sort
+    class Sorted {
+        constructor(data, compare) {
+            this.data = data.slice();
+            this.compare = compare || ((a, b) => a - b);
+        }
+        take() {
+            if (!this.data.length) return;
+            let min = this.data[0];
+            let minIndex = 0;
+            this.data.forEach((d, i) => {
+                if (this.compare(d, min) < 0) {
+                    min = d;
+                    minIndex = i;
+                }
+            })
+
+            this.data[minIndex] = this.data[this.data.length - 1];
+            this.data.pop();
+            return min;
+        }
+        give(point) {
+            this.data.push(point);
+        }
+        get length() {
+            return this.data.length;
+        }
+    }
+    // 二叉堆
+    class Heap {
+        constructor(data, compare) {
+            this.compare = compare;
+            this.data = data; // 初始data中只有一个起点，不需要考虑建立堆的过程
+        }
+        take() {
+            if (!this.data.length) return;
+            let min = this.data[0];
+            let i = 0;
+            // fix heap
+            while (i < this.data.length) {
+                let [l, r] = [i * 2 + 1, i * 2 + 2];
+                if (l > this.data.length - 1) break;
+                if (r > this.data.length - 1) {
+                    this.data[i] = this.data[l];
+                    i = l;
+                    break;
+                }
+                if (this.compare(this.data[l], this.data[r]) < 0) {
+                    this.data[i] = this.data[l];
+                    i = l;
+                } else {
+                    this.data[i] = this.data[r];
+                    i = r;
+                }
+            };
+            // console.log('take', JSON.stringify(this.data));
+            if (i < this.data.length - 1) {
+                this.insertAt(i, this.data.pop());
+            } else {
+                this.data.pop();
+            }
+            return min;
+        }
+        insertAt(i, v) {
+            this.data[i] = v;
+            let root = Math.floor((i - 1) / 2);
+            while (i > 0 && this.compare(v, this.data[root]) < 0) {
+                this.data[i] = this.data[root];
+                this.data[root] = v;
+                i = root;
+                root = Math.floor((i - 1) / 2);
+            }
+            // console.log('insertAt', JSON.stringify(this.data))
+        }
+        insert(v) {
+            // console.log(v);
+            this.insertAt(this.data.length, v);
+        }
+        get length() {
+            return this.data.length;
+        }
+
+    }
+    function sleep(t) {
+        return new Promise(res => {
+            setTimeout(res, t);
+        });
+    }
+    async function findPath(map, start, end) {
+        let distance = p => (p[0] - end[0]) ** 2 + (p[1] - end[1]) ** 2;
+        let queue = new Heap([start], (a, b) => distance(a) - distance(b));
+
+        async function insert(x, y, pre) {
+            if (x < 0 || x > 99 || y < 0 || y > 99) return;
+            if (map[y * 100 + x]) return;
+            await sleep(20);
+            container.children[y * 100 + x].style.backgroundColor = 'lightgreen';
+            map[y * 100 + x] = pre;
+            queue.insert([x, y]);
+        }
+
+        while (queue.length) {
+            let [x, y] = queue.take();
+            // console.log(x, y);
+            if (x === end[0] && y === end[1]) {
+                markPath(map, end, start);
+                return true;
+            }
+            await insert(x - 1, y, [x, y]);
+            await insert(x, y - 1, [x, y]);
+            await insert(x + 1, y, [x, y]);
+            await insert(x, y + 1, [x, y]);
+            await insert(x - 1, y - 1, [x, y]);
+            await insert(x + 1, y - 1, [x, y]);
+            await insert(x + 1, y + 1, [x, y]);
+            await insert(x - 1, y + 1, [x, y]);
+        }
+
+        return false;
+    }
+    async function markPath(map, start, end) {
+        console.log(start, end, map);
+        let runner = start;
+        while (runner[0] !== end.x || runner[1] !== end.y) {
+            let [x, y] = runner;
+            let next = map[100 * y + x];
+            await sleep(10);
+            container.children[y * 100 + x].style.backgroundColor = 'blue';
+            runner = Array.isArray(next) ? next : end;
+        }
+    }
+
+    findPath(map, [0, 0], [50, 50]);
+</script>
