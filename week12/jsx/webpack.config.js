@@ -1,5 +1,5 @@
 module.exports = {
-    entry: './main.js',
+    entry: './animation-demo.js',
     mode: 'development',
     module: {
         rules: [
@@ -9,7 +9,7 @@ module.exports = {
                     loader: 'babel-loader',
                     options: {
                         presets: ['@babel/preset-env'],
-                        plugins: [['@babel/plugin-transform-react-jsx', {pragma: "createElement"}]]
+                        plugins: [['@babel/plugin-transform-react-jsx', {pragma: "createElement"}], '@babel/plugin-proposal-class-properties']
                     }
                 }
             }
