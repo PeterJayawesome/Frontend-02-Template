@@ -110,6 +110,7 @@ export class Animation {
     let value = startValue + range * progress;
     if (typeof this.template === "function") {
       value = this.template(value);
+      // console.log(time/ duration, progress);
     }
     object[property] = value;
   }

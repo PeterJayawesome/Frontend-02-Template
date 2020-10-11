@@ -10,16 +10,16 @@ const d = [
   "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1600625901791&di=bf6e0778496ac0afa397de695c1840fe&imgtype=0&src=http%3A%2F%2Fimg.mp.itc.cn%2Fupload%2F20170418%2F679f950743c1480e83711fe2fbcb5581_th.jpg",
 ];
 
-let a = <Carousel src={d} />;
+let a = <Carousel data={d} />;
 
 a.mountTo(document.body);
 
-const tl = new TimeLine();
+// const tl = new TimeLine();
 
-window.tl = tl;
+// window.tl = tl;
 
-window.animation = new Animation({}, 'a', 0, 100, 1000, null);
+// window.animation = new Animation({}, 'a', 0, 100, 1000, null);
 
 // tl.add(new Animation({}, 'a', 0, 100, 1000, null));
 
-tl.start();
+// tl.start();

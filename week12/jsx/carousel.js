@@ -1,90 +1,180 @@
-import { Component } from "./framework";
+import createElement from "./framework";
+import { TimeLine, Animation } from "./animation";
+import { ease } from "./timingFunctions.js";
 
-class Carousel extends Component {
+class Carousel {
   constructor() {
-    super();
-    this.attributes = Object.create(null);
+    this.width = this.width || 800;
+    this.attributes = new Map();
+    this.children = [];
+    this.properties = new Map();
   }
   setAttribute(name, value) {
-    this.attributes[name] = value;
+    this[name] = value;
+  }
+  appendChild(child) {
+    this.children.push(child);
   }
   render() {
-    this.root = document.createElement("div");
-    this.root.classList.add("carousel");
-    console.log(this.attributes.src);
-    for (let record of this.attributes.src) {
-      let child = document.createElement("div");
-      child.style.backgroundImage = `url(${record})`;
-
-      child.src = record;
-      this.root.appendChild(child);
-    }
+    let timeLine = new TimeLine();
+    timeLine.start();
 
     let position = 0;
-    this.root.addEventListener("mousedown", (event) => {
-      event.preventDefault();
-      const startX = event.clientX;
-      const children = this.root.children;
-      console.log("mousedown");
-      let move = (e) => {
-        let x = e.clientX - startX;
+    let nextPicStopHandler = null;
 
-        let current = position + (x - (x % 800)) / 800;
-        for (let offset of [-2, -1, 0, 1, 2]) {
-          let pos = (current + offset + children.length) % children.length;
-          let child = children[pos];
-          x = x % 800;
-          child.style.transition = "none";
-          child.style.transform = `translateX(${
-            -pos * 800 + offset * 800 + x
-          }px)`;
-        }
+    let children = this.data.map((url, currentPosition) => {
+      let lastPosition =
+        (currentPosition - 1 + this.data.length) % this.data.length;
+      let nextPosition = (currentPosition + 1) % this.data.length;
+
+      let offset = 0;
+
+      let onStart = () => {
+        // console.log("start");
+        timeLine.pause();
+        clearTimeout(nextPicStopHandler);
+
+        let currentElement = children[currentPosition];
+
+        let currentTransformValue = Number(
+          currentElement.style.transform.match(/translateX\(([\s\S]+)px\)/)[1]
+        );
+
+        offset = currentTransformValue + 800 * currentPosition;
       };
-      let up = (e) => {
-        console.log("mouseup");
-        let x = e.clientX - startX;
-        let current = position - Math.round(x / 800);
-        for (let offset of [
+      const onPan = (e) => {
+        // console.log("pan");
+        let lastElement = children[lastPosition];
+        let currentElement = children[currentPosition];
+        let nextElement = children[nextPosition];
+
+        let { clientX, startX } = e;
+        let dx = clientX - startX;
+
+        let lastTrasformValue = this.width * (-1 - lastPosition) + offset + dx;
+        let currentTrasformValue =
+          this.width * (-1 * currentPosition) + offset + dx;
+        let nextTrasformValue = this.width * (1 - nextPosition) + offset + dx;
+        // console.log("carousel pan", clientX - startX);
+        lastElement.style.transform = `translateX(${lastTrasformValue}px)`;
+        currentElement.style.transform = `translateX(${currentTrasformValue}px)`;
+        nextElement.style.transform = `translateX(${nextTrasformValue}px)`;
+      };
+      const onPanend = (e) => {
+        // console.log("panend");
+        let direction = 0;
+        let dx = e.clientX - e.startX;
+
+        console.log("flick", e.isFlick);
+
+        if (dx + offset > 0.5 * this.width || (dx > 0 && e.isFlick)) {
+          direction = 1;
+        } else if (dx + offset < -0.5 * this.width || (dx < 0 && e.isFlick)) {
+          direction = -1;
+        }
+
+        timeLine.reset();
+        timeLine.start();
+
+        let lastElement = children[lastPosition];
+        let currentElement = children[currentPosition];
+        let nextElement = children[nextPosition];
+
+        let lastAnimation = new Animation(
+          lastElement.style,
+          "transform",
+          this.width * (-1 - lastPosition) + offset + dx,
+          this.width * (-1 - lastPosition + direction),
+          500,
           0,
-          -Math.sign(Math.round(x / 800) - x + 400 * Math.sign(x)),
-        ]) {
-          let pos = (current + offset + children.length) % children.length;
-          console.log("Carousel -> up -> offset", offset);
-          let child = children[pos];
-          x = x % 800;
-          child.style.transition = "";
-          child.style.transform = `translateX(${-pos * 800 + offset * 800}px)`;
-        }
-        position = (current + children.length) % children.length;
-        document.removeEventListener("mousemove", move);
-        document.removeEventListener("mouseup", up);
+          ease,
+          (v) => `translateX(${v}px)`
+        );
+        let currentAnimation = new Animation(
+          currentElement.style,
+          "transform",
+          this.width * -1 * currentPosition + offset + dx,
+          this.width * (-1 * currentPosition + direction),
+          500,
+          0,
+          ease,
+          (v) => `translateX(${v}px)`
+        );
+        let nextAnimation = new Animation(
+          nextElement.style,
+          "transform",
+          this.width * (1 - nextPosition) + offset + dx,
+          this.width * (1 - nextPosition + direction),
+          500,
+          0,
+          ease,
+          (v) => `translateX(${v}px)`
+        );
+        timeLine.add(currentAnimation);
+        timeLine.add(lastAnimation);
+        timeLine.add(nextAnimation);
+
+        position = (position - direction + this.data.length) % this.data.length;
+
+        nextPicStopHandler = setTimeout(nextPic, 3000);
       };
-
-      document.addEventListener("mouseup", up);
-      document.addEventListener("mousemove", move);
+      let element = (
+        <img
+          src={url}
+          onStart={onStart}
+          onPan={onPan}
+          onPanEnd={onPanend}
+          enableGesture={true}
+        />
+      );
+      element.style.transform = "translateX(0px)";
+      element.addEventListener("dragStart", (e) => e.preventDefault());
+      return element;
     });
-    // let currentIndex = 0;
-    // setInterval(() => {
-    //   let children = this.root.children;
-    // 	let nextIndex = (currentIndex + 1) % children.length;
 
-    //   let current = children[currentIndex];
-    // 	let next = children[nextIndex];
-    // 	console.log(nextIndex)
+    let nextPic = () => {
+      let nextPosition = (position + 1) % children.length;
 
-    //   next.style.transition = "none";
-    //   next.style.transform = `translateX(${100 - nextIndex * 100}%)`;
-    //   setTimeout(() => {
-    //     next.style.transition = "";
-    //     current.style.transform = `translateX(-${100 + currentIndex * 100}%)`;
-    //     next.style.transform = `translateX(-${nextIndex * 100}%)`;
-    //     currentIndex = nextIndex;
-    //   }, 16);
-    // }, 3000);
-    return this.root;
+      let current = children[position];
+      let next = children[nextPosition];
+      // console.log(nextPosition);
+
+      next.style.transition = "none";
+      next.style.transform = `translateX(${100 - 100 * nextPosition}%)`;
+
+      let currentAmination = new Animation(
+        current.style,
+        "transform",
+        -1 * position,
+        -1 - position,
+        500,
+        0,
+        ease,
+        (v) => `translateX(${this.width * v}px)`
+      );
+      let nextAmination = new Animation(
+        next.style,
+        "transform",
+        100 - 100 * nextPosition,
+        -100 * nextPosition,
+        500,
+        0,
+        ease,
+        (v) => `translateX(${8 * v}px)`
+      );
+
+      timeLine.add(currentAmination);
+      timeLine.add(nextAmination);
+      position = nextPosition;
+
+      nextPicStopHandler = setTimeout(nextPic, 3000);
+    };
+    nextPicStopHandler = setTimeout(nextPic, 3000);
+
+    return <div class="carousel">{children}</div>;
   }
   mountTo(parent) {
-    parent.appendChild(this.render());
+    this.render().mountTo(parent);
   }
 }
 
